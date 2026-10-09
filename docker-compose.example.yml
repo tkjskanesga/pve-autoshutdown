@@ -1,0 +1,22 @@
+# Testing-only example. Do not put production credentials in the repo.
+# Copy this file to docker-compose.yml and replace EXAMPLE values with test values.
+services:
+  app:
+    image: ghcr.io/tkjskanesga/pve-autoshutdown:main
+    container_name: pve-autoshutdown-test
+    ports:
+      - "8080:8080"
+    environment:
+      PVE_HOSTS: https://pve-test-example:8006
+      PVE_VERIFY_SSL: "false"
+      PVE_TOKEN: testuser@pve!example=EXAMPLE_SECRET
+      TARGET_TAGS: praktik
+      EXCLUDE_VMIDS: ""
+      DRY_RUN: "true"
+      INTER_VM_DELAY_SEC: "2"
+      FORCE_AFTER_SEC: "120"
+      POLL_INTERVAL_SEC: "5"
+      WEB_PASSWORD: change-me
+      SESSION_TTL_HOURS: "8"
+      PORT: "8080"
+      FRONTEND_MODE: embed
