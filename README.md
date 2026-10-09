@@ -23,6 +23,34 @@ See `.env.example`. The important ones:
 | `DRY_RUN` | `true` = log only, no action |
 | `WEB_PASSWORD` | WebUI login password (required) |
 
+## Proxmox API token
+
+Create the token under Datacenter → Permissions → API Tokens, then grant it rights.
+A token created with Privilege Separation starts with zero permissions: API calls
+succeed but return empty lists (`{"data":[]}`). Grant at least:
+
+```
+pveum acl modify / -token 'USER@REALM!TOKENID' -role PVEAuditor
+pveum acl modify /vms -token 'USER@REALM!TOKENID' -role PVEVMAdmin
+```
+
+Example:
+
+```
+pveum acl modify / -token 'automationshutdown@pve!testing' -role PVEAuditor
+pveum acl modify /vms -token 'automationshutdown@pve!testing' -role PVEVMAdmin
+```
+
+`PVEAuditor` on `/` allows cluster-wide inventory reads, `PVEVMAdmin` on `/vms`
+allows shutdown and stop (`VM.PowerMgmt`). Verify with:
+
+```
+curl -sk -H "Authorization: PVEAPIToken=USER@REALM!TOKENID=SECRET" \
+  'https://PVE-HOST:8006/api2/json/cluster/resources?type=vm'
+```
+
+It must list VMs instead of `{"data":[]}`.
+
 ## Run locally
 
 ```bash
