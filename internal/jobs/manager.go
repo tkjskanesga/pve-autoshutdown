@@ -237,6 +237,7 @@ func (m *Manager) run(ctx context.Context, j *Job, targets []pve.Guest) {
 			now := time.Now()
 			if !t.forced && now.After(t.shutdownAt.Add(time.Duration(m.opt.ForceAfterS)*time.Second)) {
 				j.emit(g.VMID, g.Node, g.Type, "force-stop", g.Type+"/"+itoa(g.VMID)+" did not stop in time, forcing stop")
+				log.Printf("job %s: force-stopping %d (%s)", j.ID, g.VMID, g.Node)
 				if err := m.pve.Stop(g.Node, g.Type, g.VMID); err != nil {
 					j.emit(g.VMID, g.Node, g.Type, "error", "force stop failed for "+g.Type+"/"+itoa(g.VMID)+": "+err.Error())
 					t.finished = true
@@ -249,6 +250,7 @@ func (m *Manager) run(ctx context.Context, j *Job, targets []pve.Guest) {
 			}
 			if t.forced && now.After(t.forceAt.Add(60*time.Second)) {
 				j.emit(g.VMID, g.Node, g.Type, "error", g.Type+"/"+itoa(g.VMID)+" still running after force stop, needs manual check")
+				log.Printf("job %s: %d still running after force stop", j.ID, g.VMID)
 				t.finished = true
 				j.bumpDone()
 				continue

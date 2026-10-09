@@ -1,10 +1,13 @@
 package web
 
 import (
+	"bufio"
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -55,7 +58,40 @@ func New(cfg *config.Config) *Server {
 	return s
 }
 
-func (s *Server) Handler() http.Handler { return s.mux }
+func (s *Server) Handler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		rec := &statusRecorder{ResponseWriter: w, code: 200}
+		s.mux.ServeHTTP(rec, r)
+		if !strings.HasPrefix(r.URL.Path, "/assets/") {
+			log.Printf("%s %s -> %d (%s)", r.Method, r.URL.Path, rec.code, time.Since(start).Round(time.Millisecond))
+		}
+	})
+}
+
+type statusRecorder struct {
+	http.ResponseWriter
+	code int
+}
+
+func (r *statusRecorder) WriteHeader(code int) {
+	r.code = code
+	r.ResponseWriter.WriteHeader(code)
+}
+
+func (r *statusRecorder) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	h, ok := r.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("hijack not supported")
+	}
+	return h.Hijack()
+}
+
+func (r *statusRecorder) Flush() {
+	if f, ok := r.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
 
 func (s *Server) routes() {
 	s.mux.HandleFunc("GET /healthz", s.healthz)
@@ -195,6 +231,7 @@ func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 	if targets == nil {
 		targets = []pve.Guest{}
 	}
+	log.Printf("preview: %d running targets (tags=%v)", len(targets), s.cfg.TargetTags)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"total_running": len(targets),
 		"targets":       targets,

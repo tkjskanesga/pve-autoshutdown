@@ -93,7 +93,7 @@ func Load() (*Config, error) {
 		PVEHosts:      hosts,
 		PVEVerifySSL:  getBool("PVE_VERIFY_SSL", false),
 		PVEToken:      strings.TrimSpace(os.Getenv("PVE_TOKEN")),
-		TargetTags:     tags,
+		TargetTags:    tags,
 		ExcludeVMIDs:  exclude,
 		DryRun:        getBool("DRY_RUN", false),
 		InterVMDelayS: getInt("INTER_VM_DELAY_SEC", 2),
