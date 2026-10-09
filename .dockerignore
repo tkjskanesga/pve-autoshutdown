@@ -1,0 +1,7 @@
+node_modules/
+internal/web/dist/
+.git/
+.env
+*.out
+automationshutdown
+server

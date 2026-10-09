@@ -1,0 +1,7 @@
+node_modules/
+internal/web/dist/*
+!internal/web/dist/.gitkeep
+automationshutdown
+server
+.env
+*.out

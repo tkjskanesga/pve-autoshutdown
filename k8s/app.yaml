@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: automationshutdown
+  labels:
+    app: automationshutdown
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: automationshutdown
+  template:
+    metadata:
+      labels:
+        app: automationshutdown
+    spec:
+      containers:
+        - name: automationshutdown
+          image: automationshutdown:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: automationshutdown-config
+          env:
+            - name: PVE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: automationshutdown-secret
+                  key: pve-token
+            - name: WEB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: automationshutdown-secret
+                  key: web-password
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: automationshutdown-config
+data:
+  PVE_HOSTS: "https://pve-1:8006,https://pve-2:8006"
+  PVE_VERIFY_SSL: "false"
+  TARGET_TAGS: "praktik"
+  EXCLUDE_VMIDS: ""
+  DRY_RUN: "false"
+  INTER_VM_DELAY_SEC: "2"
+  FORCE_AFTER_SEC: "300"
+  POLL_INTERVAL_SEC: "5"
+  PORT: "8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: automationshutdown
+spec:
+  selector:
+    app: automationshutdown
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: automationshutdown
+spec:
+  rules:
+    - host: shutdown.contoh.lan
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: automationshutdown
+                port:
+                  number: 80
