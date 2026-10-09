@@ -1,15 +1,15 @@
 # DESIGN.md (automationshutdown)
 
-Internal ops console, satu layar satu keputusan: matikan semua VM yang cocok filter atau tidak.
+An internal ops console: one screen, one decision. Shut down every matching VM, or not.
 
-Dial: ENERGY 1 / RHYTHM 1 / MOTION 1. Alat tenang untuk momen tegang, bukan landing page.
+Dials: ENERGY 1 / RHYTHM 1 / MOTION 1. A calm tool for a tense moment, not a landing page.
 
-## Keputusan dan alasan (satu baris tiap keputusan)
+## Decisions and reasons (one line each)
 
-- Palet netral HeroUI + satu aksen merah `danger` hanya di tombol shutdown dan status force-stop, agar momen destruktif langsung terbaca.
-- Tanpa gradient, tanpa glass, tanpa grid dekoratif, agar terlihat seperti alat infra bukan template AI.
-- Inter untuk UI (tabular-nums agar kolom VMID stabil) dan JetBrains Mono untuk VMID plus timestamp log, karena log realtime dibaca sebagai data.
-- Tabel preview kolom VMID, nama, node, type, tag: hanya field yang menentukan keputusan eksekusi.
-- Modal konfirmasi selalu menyebut angka target dan mode dry-run, karena aksi tidak bisa di-undo.
-- Toggle light/dark ikut sistem (default system), karena operator berganti shift dan perangkat.
-- Empty state jujur ("Tidak ada VM running yang cocok...") plus error state dengan tombol retry, karena preview bergantung Proxmox yang bisa down.
+- Neutral HeroUI palette plus a single red `danger` accent only on the shutdown button and force-stop states, so the destructive moment reads instantly.
+- No gradients, no glass, no decorative grids, so it looks like infra tooling instead of an AI template.
+- Inter for UI (tabular-nums keep the VMID column stable) and JetBrains Mono for VMIDs plus log timestamps, because the realtime log is read as data.
+- Preview table columns VMID, name, node, type, tags: only the fields that decide the run.
+- The confirm modal always states the target count and the dry-run mode, because the action cannot be undone.
+- Light/dark follows the system (default system), because operators rotate across shifts and devices.
+- Honest empty state ("No running vm right now...") plus an error state with retry, because the preview depends on a Proxmox that can be down.
